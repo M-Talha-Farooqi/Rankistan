@@ -305,19 +305,19 @@ export default function DevMap() {
     if (!selectedCity || !devsByCity[selectedCity]) return null;
 
     return (
-      <div className="max-w-6xl mx-auto px-6 pb-12 relative z-10">
-        <div ref={tableRef} className="border border-outline-variant bg-surface-container-lowest">
-          <div className="p-4 border-b border-outline-variant bg-surface-container-high flex items-center justify-between">
-            <span className="font-mono text-xs uppercase tracking-widest flex items-center gap-2">
-              <span className="w-2 h-2 bg-tertiary animate-pulse"></span>
-              {formatCityLabel(selectedCity).toUpperCase()} Developers
-              <span className="font-mono text-[10px] text-outline font-normal">
+      <div className="max-w-6xl mx-auto px-4 pb-6 sm:px-6 sm:pb-8 md:pb-12 relative z-10">
+        <div ref={tableRef} className="border border-outline-variant bg-surface-container-lowest overflow-hidden">
+          <div className="p-3 sm:p-4 border-b border-outline-variant bg-surface-container-high flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span className="font-mono text-xs uppercase tracking-widest flex items-center gap-2 min-w-0">
+              <span className="w-2 h-2 bg-tertiary animate-pulse shrink-0"></span>
+              <span className="truncate">{formatCityLabel(selectedCity).toUpperCase()} Developers</span>
+              <span className="font-mono text-[10px] text-outline font-normal shrink-0">
                 [{devsByCity[selectedCity].length} active]
               </span>
             </span>
             <button
               onClick={() => setSelectedCity(null)}
-              className="font-mono text-[10px] text-outline hover:text-primary transition-colors flex items-center gap-1"
+              className="font-mono text-[10px] text-outline hover:text-primary transition-colors flex items-center gap-1 self-start sm:self-auto min-h-11 sm:min-h-0"
             >
               <span className="material-symbols-outlined text-sm">close</span>
               CLOSE
@@ -327,13 +327,13 @@ export default function DevMap() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-surface-container-high/50 border-b border-outline-variant">
-                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3 w-12">#</th>
-                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3">Developer</th>
-                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3 hidden md:table-cell">Location</th>
-                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3">Score</th>
-                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3 hidden sm:table-cell">Events_30d</th>
-                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3 hidden lg:table-cell">Stars</th>
-                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-4 py-3 hidden lg:table-cell">Repos</th>
+                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3 w-12">#</th>
+                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3">Developer</th>
+                  <th className="text-left font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3 hidden md:table-cell">Location</th>
+                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3">Score</th>
+                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3 hidden sm:table-cell">Events_30d</th>
+                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3 hidden lg:table-cell">Stars</th>
+                  <th className="text-right font-mono text-[10px] text-outline uppercase tracking-widest px-3 py-2 sm:px-4 sm:py-3 hidden lg:table-cell">Repos</th>
                 </tr>
               </thead>
               <tbody>
@@ -342,10 +342,10 @@ export default function DevMap() {
                     key={dev.username}
                     className="border-b border-outline-variant/30 hover:bg-surface-container-low transition-colors"
                   >
-                    <td className="px-4 py-3 font-mono text-[10px] text-outline">{i + 1}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 border border-outline-variant grayscale hover:grayscale-0 transition-all overflow-hidden">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 font-mono text-[10px] text-outline">{i + 1}</td>
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 min-w-0">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                        <div className="w-8 h-8 border border-outline-variant grayscale hover:grayscale-0 transition-all overflow-hidden shrink-0">
                           <img
                             src={dev.avatar_url || `https://github.com/${dev.username}.png?size=32`}
                             alt={dev.username}
@@ -354,34 +354,34 @@ export default function DevMap() {
                             decoding="async"
                           />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <a
                             href={`https://github.com/${dev.username}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="font-headline font-bold text-xs text-primary uppercase tracking-tight hover:underline"
+                            className="font-headline font-bold text-xs text-primary uppercase tracking-tight hover:underline truncate block"
                           >
                             {dev.username}
                           </a>
                           {dev.name && (
-                            <div className="font-mono text-[10px] text-outline uppercase tracking-tighter truncate max-w-[160px]">{dev.name}</div>
+                            <div className="font-mono text-[10px] text-outline uppercase tracking-tighter truncate max-w-[140px] sm:max-w-[160px]">{dev.name}</div>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 font-mono text-[10px] text-outline truncate max-w-[180px] hidden md:table-cell">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 font-mono text-[10px] text-outline truncate max-w-[180px] hidden md:table-cell">
                       {normalizeLocationForDisplay(dev.location)}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs font-bold text-on-surface">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 text-right font-mono text-xs font-bold text-on-surface">
                       {(dev.score || 0).toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-tertiary hidden sm:table-cell">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 text-right font-mono text-xs text-tertiary hidden sm:table-cell">
                       {dev.events_30d || 0}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-outline hidden lg:table-cell">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 text-right font-mono text-xs text-outline hidden lg:table-cell">
                       {(dev.total_stars || 0).toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-right font-mono text-xs text-outline hidden lg:table-cell">
+                    <td className="px-3 py-2 sm:px-4 sm:py-3 text-right font-mono text-xs text-outline hidden lg:table-cell">
                       {dev.public_repos || 0}
                     </td>
                   </tr>
@@ -409,38 +409,38 @@ export default function DevMap() {
     <main className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 grid-lines pointer-events-none"></div>
       {/* Hero */}
-      <div className="max-w-6xl mx-auto px-6 pt-12 pb-10 relative z-10">
-        <div className="border-l-4 border-primary pl-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-          <div>
-            <h1 className="font-headline text-5xl font-extrabold tracking-tighter uppercase text-on-surface mb-2">
+      <div className="max-w-6xl mx-auto px-4 pt-6 pb-6 sm:px-6 sm:pt-8 sm:pb-8 md:pt-12 md:pb-10 relative z-10">
+        <div className="border-l-4 border-primary pl-4 sm:pl-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 sm:gap-6">
+          <div className="min-w-0">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter uppercase text-on-surface mb-2">
               Developer <span className="text-primary">Map</span>
             </h1>
-            <p className="font-mono text-sm text-outline max-w-xl uppercase tracking-widest">
+            <p className="font-mono text-xs sm:text-sm text-outline max-w-xl uppercase tracking-widest leading-relaxed">
               Geographic distribution of active Pakistani developers across major places.
             </p>
           </div>
-          <div className="flex gap-6">
-            <div className="text-right">
-              <div className="font-mono text-[10px] text-outline uppercase tracking-widest">Total_Devs</div>
-              <div className="text-2xl font-headline font-bold text-tertiary">{totalDevs.toLocaleString()}</div>
+          <div className="grid w-full grid-cols-3 gap-3 sm:flex sm:w-auto sm:gap-6">
+            <div className="text-left sm:text-right">
+              <div className="font-mono text-[9px] sm:text-[10px] text-outline uppercase tracking-widest">Total_Devs</div>
+              <div className="text-xl sm:text-2xl font-headline font-bold text-tertiary">{totalDevs.toLocaleString()}</div>
             </div>
-            <div className="text-right">
-              <div className="font-mono text-[10px] text-outline uppercase tracking-widest">Places</div>
-              <div className="text-2xl font-headline font-bold text-primary">{cityStats.filter(c => c.city !== 'other').length}</div>
+            <div className="text-left sm:text-right">
+              <div className="font-mono text-[9px] sm:text-[10px] text-outline uppercase tracking-widest">Places</div>
+              <div className="text-xl sm:text-2xl font-headline font-bold text-primary">{cityStats.filter(c => c.city !== 'other').length}</div>
             </div>
-            <div className="text-right">
-              <div className="font-mono text-[10px] text-outline uppercase tracking-widest">Unspecified</div>
-              <div className="text-2xl font-headline font-bold text-outline">{cityStats.find(c => c.city === 'other')?.count || 0}</div>
+            <div className="text-left sm:text-right">
+              <div className="font-mono text-[9px] sm:text-[10px] text-outline uppercase tracking-widest">Unspecified</div>
+              <div className="text-xl sm:text-2xl font-headline font-bold text-outline">{cityStats.find(c => c.city === 'other')?.count || 0}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Map + City List */}
-      <div className="max-w-[1440px] mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-outline-variant mb-12">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-outline-variant mb-8 sm:mb-12">
           {/* Map */}
-          <div className="lg:col-span-7 p-6 bg-surface-container-lowest border-r border-outline-variant">
+          <div className="lg:col-span-7 p-4 sm:p-6 bg-surface-container-lowest border-b lg:border-b-0 lg:border-r border-outline-variant">
             <div className="relative overflow-hidden">
               <div className="absolute inset-0 opacity-10 pointer-events-none grid-line-x"></div>
               <div className="absolute inset-0 opacity-10 pointer-events-none grid-line-y"></div>
@@ -517,15 +517,15 @@ export default function DevMap() {
           </div>
 
           {/* City List */}
-          <div className="lg:col-span-5 border-t lg:border-t-0 p-6 bg-surface">
-            <div className="flex items-center justify-between mb-5">
-              <label className="font-mono text-xs text-tertiary uppercase tracking-tighter flex items-center gap-2">
-                <span className="w-2 h-2 bg-tertiary animate-pulse"></span>
-                Place Breakdown
+          <div className="lg:col-span-5 p-4 sm:p-6 bg-surface">
+            <div className="flex items-center justify-between mb-4 sm:mb-5 gap-3">
+              <label className="font-mono text-xs text-tertiary uppercase tracking-tighter flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 bg-tertiary animate-pulse shrink-0"></span>
+                <span className="truncate">Place Breakdown</span>
               </label>
-              <span className="font-mono text-[10px] text-outline">{cityStats.length} Places</span>
+              <span className="font-mono text-[10px] text-outline shrink-0">{cityStats.length} Places</span>
             </div>
-            <div ref={cityListRef} className="space-y-2 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
+            <div ref={cityListRef} className="space-y-2 max-h-[360px] sm:max-h-[480px] lg:max-h-[600px] overflow-y-auto pr-1 sm:pr-2 scrollbar-thin">
               {cityStats.map(({ city, count, totalScore, topDev }, idx) => {
                 const coords = CITY_COORDS[city];
                 const color = DOT_COLORS[city] || DOT_COLORS._default;
@@ -542,7 +542,7 @@ export default function DevMap() {
                         delete cityRowRefs.current[city];
                       }
                     }}
-                    className={`border p-3 transition-all duration-200 cursor-pointer ${
+                    className={`border p-2.5 sm:p-3 transition-all duration-200 cursor-pointer ${
                       isSelected
                         ? 'border-primary bg-primary/10'
                         : isHovered
@@ -553,22 +553,22 @@ export default function DevMap() {
                     onMouseLeave={clearHoveredCity}
                     onClick={() => handleSelectCity(city)}
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] text-outline w-5 text-right">
+                    <div className="flex items-center justify-between mb-2 gap-2 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="font-mono text-[10px] text-outline w-5 text-right shrink-0">
                           {String(idx + 1).padStart(2, '0')}
                         </span>
-                        <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color.fill }}></span>
-                        <span className="font-headline text-sm font-bold uppercase tracking-tighter">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: color.fill }}></span>
+                        <span className="font-headline text-xs sm:text-sm font-bold uppercase tracking-tighter truncate">
                           {formatCityLabel(city)}
                         </span>
                         {coords && (
-                          <span className="font-mono text-[9px] text-outline">[{coords.code}]</span>
+                          <span className="font-mono text-[9px] text-outline shrink-0 hidden sm:inline">[{coords.code}]</span>
                         )}
                       </div>
-                      <span className="font-mono text-sm font-bold text-primary">{count}</span>
+                      <span className="font-mono text-sm font-bold text-primary shrink-0">{count}</span>
                     </div>
-                    <div className="flex items-center gap-3 ml-[30px]">
+                    <div className="flex items-center gap-2 sm:gap-3 ml-[22px] sm:ml-[30px] min-w-0">
                       <div className="flex-1">
                         <div className="w-full bg-surface-container-highest h-1.5">
                           <div
@@ -580,17 +580,17 @@ export default function DevMap() {
                       <span className="font-mono text-[10px] text-outline w-12 text-right">{pct}%</span>
                     </div>
                     {topDev && (
-                      <div className="mt-2 ml-[30px] flex items-center gap-2">
-                        <span className="text-[9px] text-outline font-mono">TOP:</span>
+                      <div className="mt-2 ml-[22px] sm:ml-[30px] flex items-center gap-2 min-w-0">
+                        <span className="text-[9px] text-outline font-mono shrink-0">TOP:</span>
                         <a
                           href={`https://github.com/${topDev.username}`}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[10px] text-primary font-mono hover:underline"
+                          className="text-[10px] text-primary font-mono hover:underline truncate"
                         >
                           @{topDev.username}
                         </a>
-                        <span className="text-[9px] text-outline font-mono">({topDev.score} pts)</span>
+                        <span className="text-[9px] text-outline font-mono shrink-0">({topDev.score} pts)</span>
                       </div>
                     )}
                   </div>

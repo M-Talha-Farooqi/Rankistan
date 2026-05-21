@@ -301,21 +301,21 @@ export default function Register({ onChangeTab }) {
   return (
     <main className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 grid-lines pointer-events-none"></div>
-      <div className="max-w-6xl mx-auto px-6 py-12 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 sm:py-8 md:py-12 relative z-10">
 
-        <div className="mb-12 border-l-4 border-primary pl-6">
-          <h1 className="font-headline text-5xl font-extrabold tracking-tighter uppercase text-on-surface mb-2">
+        <div className="mb-8 border-l-4 border-primary pl-4 sm:mb-12 sm:pl-6">
+          <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter uppercase text-on-surface mb-2">
             Initialize <span className="text-primary">Profile</span>
           </h1>
-          <p className="font-mono text-sm text-outline max-w-xl uppercase tracking-widest">
+          <p className="font-mono text-xs sm:text-sm text-outline max-w-xl uppercase tracking-widest leading-relaxed">
             Entry point for the high-performance engineering cluster. Provide your GitHub identifier to synchronize.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border border-outline-variant">
 
-          <div className="lg:col-span-5 p-8 bg-surface-container-lowest border-r border-outline-variant flex flex-col justify-between">
-            <div className="space-y-8">
+          <div className="lg:col-span-5 p-4 sm:p-6 lg:p-8 bg-surface-container-lowest border-b lg:border-b-0 lg:border-r border-outline-variant flex flex-col justify-between">
+            <div className="space-y-6 sm:space-y-8">
               <div>
                 <label className="font-mono text-xs text-tertiary uppercase tracking-tighter mb-4 block">System Input / User ID</label>
                 <div className="relative group">
@@ -340,15 +340,15 @@ export default function Register({ onChangeTab }) {
               {status === 'idle' || status === 'error' ? (
                 <button
                   onClick={handleRegister}
-                  className="w-full bg-primary text-on-primary font-headline font-bold py-4 px-6 flex items-center justify-between hover:bg-primary-container transition-colors duration-50 active:scale-[0.98]"
+                  className="w-full min-h-11 bg-primary text-on-primary font-headline font-bold py-4 px-6 flex items-center justify-between hover:bg-primary-container transition-colors duration-50 active:scale-[0.98]"
                 >
-                  <span className="uppercase tracking-widest">Execute Registration</span>
+                  <span className="uppercase tracking-widest text-sm sm:text-base">Execute Registration</span>
                   <span className="material-symbols-outlined">arrow_forward</span>
                 </button>
               ) : status === 'loading' ? (
                 <button
                   disabled
-                  className="w-full bg-surface-container-highest text-outline font-headline font-bold py-4 px-6 flex items-center justify-between transition-colors duration-50"
+                  className="w-full min-h-11 bg-surface-container-highest text-outline font-headline font-bold py-4 px-6 flex items-center justify-between transition-colors duration-50"
                 >
                   <span className="uppercase tracking-widest flex items-center gap-2">
                     <span className="w-2 h-2 bg-tertiary animate-pulse inline-block"></span>
@@ -356,19 +356,19 @@ export default function Register({ onChangeTab }) {
                   </span>
                 </button>
               ) : (
-                <div className="w-full bg-tertiary-container/20 border border-tertiary text-tertiary font-headline font-bold py-4 px-6 flex items-center justify-between">
-                  <span className="uppercase tracking-widest">NODE_ACCEPTED</span>
+                <div className="w-full min-h-11 bg-tertiary-container/20 border border-tertiary text-tertiary font-headline font-bold py-4 px-6 flex items-center justify-between">
+                  <span className="uppercase tracking-widest text-sm sm:text-base">NODE_ACCEPTED</span>
                   <span className="material-symbols-outlined">check_circle</span>
                 </div>
               )}
 
               {errorMsg && (
-                <div className="font-mono text-[10px] text-error uppercase tracking-widest p-3 bg-error-container/10 border-l-2 border-error">
+                <div className="font-mono text-[10px] text-error uppercase tracking-widest p-3 bg-error-container/10 border-l-2 border-error break-words">
                   {errorMsg}
                 </div>
               )}
 
-              <div className="pt-8 border-t border-outline-variant/30">
+              <div className="pt-6 sm:pt-8 border-t border-outline-variant/30">
                 <h3 className="font-mono text-xs text-outline-variant uppercase mb-4">Registration Requirements</h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-3 text-xs font-mono text-outline">
@@ -400,7 +400,7 @@ export default function Register({ onChangeTab }) {
             </div>
 
             {status === 'complete' && (
-              <div ref={statusPanelRef} className="mt-8 font-mono text-xs text-tertiary border border-tertiary/30 bg-tertiary/10 p-4 animate-pulse">
+              <div ref={statusPanelRef} className="mt-6 sm:mt-8 font-mono text-[11px] sm:text-xs text-tertiary border border-tertiary/30 bg-tertiary/10 p-3 sm:p-4 animate-pulse leading-relaxed">
                 &gt; Profile Validated.<br />
                 &gt; All criteria passed.<br />
                 &gt; Estimated Score: {profileData?._calculatedScore} {profileData?._agePenaltyApplied && <span className="text-error">(0.5x New Account Penalty Applied)</span>}<br />
@@ -413,7 +413,7 @@ export default function Register({ onChangeTab }) {
           </div>
 
           <div className="lg:col-span-7 bg-surface p-0 flex flex-col min-h-0">
-            <div className="p-6 border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+            <div className="p-4 sm:p-6 border-b border-outline-variant bg-surface-container-high flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center">
               <span className="font-mono text-xs uppercase tracking-widest flex items-center gap-2">
                 <span className="w-2 h-2 bg-tertiary animate-pulse"></span>
                 Recent Synchronizations
@@ -422,32 +422,32 @@ export default function Register({ onChangeTab }) {
             </div>
 
             <div
-              className="overflow-y-auto bg-surface-container-lowest pr-2 scrollbar-thin transition-[height] duration-150"
+              className="overflow-y-auto bg-surface-container-lowest pr-1 sm:pr-2 scrollbar-thin transition-[height] duration-150 max-h-[70vh] sm:max-h-none"
               style={{ height: recentSyncHeight }}
             >
               {recentDevs.length === 0 && (
-                <div className="p-8 text-center text-outline-variant font-mono text-xs uppercase animate-pulse">
+                <div className="p-6 sm:p-8 text-center text-outline-variant font-mono text-xs uppercase animate-pulse">
                   Awaiting stream segments...
                 </div>
               )}
 
               {recentDevs.map((dev, idx) => (
-                <div key={dev.username + idx} className={`grid grid-cols-12 items-center border-b ${dev.isNew ? 'border-tertiary bg-tertiary/5' : 'border-outline-variant/50 hover:bg-surface-container-low'} transition-colors group cursor-default relative overflow-hidden`}>
+                <div key={dev.username + idx} className={`flex items-center gap-3 border-b p-3 sm:grid sm:grid-cols-12 sm:items-center sm:gap-0 sm:p-0 ${dev.isNew ? 'border-tertiary bg-tertiary/5' : 'border-outline-variant/50 hover:bg-surface-container-low'} transition-colors group cursor-default relative overflow-hidden`}>
                   {dev.isNew && (
                     <div className="absolute top-0 right-0 bg-tertiary text-on-tertiary font-mono text-[8px] px-2 py-1 tracking-widest z-10 font-bold uppercase">
                       New Node
                     </div>
                   )}
-                  <div className="col-span-2 p-4 flex justify-center relative z-10">
+                  <div className="shrink-0 sm:col-span-2 sm:p-4 sm:flex sm:justify-center relative z-10">
                     <div className={`w-10 h-10 border ${dev.isNew ? 'border-tertiary shadow-[0_0_10px_rgba(80,184,94,0.4)]' : 'border-outline-variant grayscale group-hover:grayscale-0 transition-all'} overflow-hidden`}>
                       <img alt={`${dev.username} profile`} className="w-full h-full object-cover" src={dev.avatar} />
                     </div>
                   </div>
-                  <div className="col-span-6 p-4 relative z-10">
-                    <div className={`font-headline font-bold text-sm tracking-tight uppercase ${dev.isNew ? 'text-tertiary' : 'text-on-surface'}`}>{dev.username}</div>
+                  <div className="min-w-0 flex-1 sm:col-span-6 sm:p-4 relative z-10">
+                    <div className={`font-headline font-bold text-sm tracking-tight uppercase truncate ${dev.isNew ? 'text-tertiary' : 'text-on-surface'}`}>{dev.username}</div>
                     <div className="font-mono text-[10px] text-outline uppercase tracking-tighter line-clamp-1">{dev.role} &bull; {dev.location}</div>
                   </div>
-                  <div className="col-span-4 p-4 text-right relative z-10">
+                  <div className="shrink-0 text-right sm:col-span-4 sm:p-4 relative z-10">
                     <div className={`inline-block px-2 py-1 font-mono text-[9px] uppercase ${dev.isNew ? 'bg-tertiary-container text-on-tertiary-container' : 'bg-secondary-container text-on-secondary-container'}`}>
                       {typeof dev.score !== 'undefined' ? `Score: ${dev.score}` : dev.stack}
                     </div>
@@ -456,24 +456,24 @@ export default function Register({ onChangeTab }) {
                 </div>
               ))}
             </div>
-            <div className="p-4 bg-surface-container-highest border-t border-outline-variant text-center">
-              <button onClick={() => onChangeTab?.('leaderboard')} className="font-mono text-[10px] text-primary uppercase tracking-widest hover:underline">View All Node Connections</button>
+            <div className="p-3 sm:p-4 bg-surface-container-highest border-t border-outline-variant text-center">
+              <button onClick={() => onChangeTab?.('leaderboard')} className="font-mono text-[10px] text-primary uppercase tracking-widest hover:underline min-h-11 sm:min-h-0 inline-flex items-center justify-center">View All Node Connections</button>
             </div>
           </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 border border-outline-variant bg-surface-container-lowest">
+        <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="p-4 sm:p-6 border border-outline-variant bg-surface-container-lowest">
             <span className="material-symbols-outlined text-primary mb-4">hub</span>
             <h4 className="font-headline font-bold uppercase text-on-surface mb-2">Global Routing</h4>
             <p className="font-body text-xs text-outline leading-relaxed">Your profile is indexed across our global edge network, making your skills discoverable by international tech recruiters.</p>
           </div>
-          <div className="p-6 border border-outline-variant bg-surface-container-lowest">
+          <div className="p-4 sm:p-6 border border-outline-variant bg-surface-container-lowest">
             <span className="material-symbols-outlined text-tertiary mb-4">monitoring</span>
             <h4 className="font-headline font-bold uppercase text-on-surface mb-2">Realtime Stats</h4>
             <p className="font-body text-xs text-outline leading-relaxed">Track your ranking within the Pakistani developer ecosystem based on commit velocity, impact, and code quality.</p>
           </div>
-          <div className="p-6 border border-outline-variant bg-surface-container-lowest">
+          <div className="p-4 sm:p-6 border border-outline-variant bg-surface-container-lowest">
             <span className="material-symbols-outlined text-secondary mb-4">lock_open</span>
             <h4 className="font-headline font-bold uppercase text-on-surface mb-2">Open Standard</h4>
             <p className="font-body text-xs text-outline leading-relaxed">Built for engineers, by engineers. Your data belongs to you, exported anytime via our public GraphQL API.</p>
