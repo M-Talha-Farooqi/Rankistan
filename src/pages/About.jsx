@@ -99,7 +99,7 @@ export default function About() {
         {/* Hero */}
         <div className="mb-8 border-l-4 border-primary pl-4 sm:mb-12 sm:pl-6">
           <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tighter text-on-surface mb-2">
-            About <span className="text-primary font-normal tracking-normal ml-1 sm:ml-2 inline-block align-middle -translate-y-[0.16em] text-[1.08em]" style={{ fontFamily: "'Waltograph', 'Space Grotesk', sans-serif" }}>Rankistan</span>
+            About <span className="text-primary font-normal tracking-normal ml-1 sm:ml-2 inline-block align-middle translate-y-0.5 sm:-translate-y-[0.16em] text-[1.08em]" style={{ fontFamily: "'Waltograph', 'Space Grotesk', sans-serif" }}>Rankistan</span>
           </h1>
           <p className="font-mono text-xs sm:text-sm text-outline max-w-xl uppercase tracking-widest leading-relaxed">
             System documentation for the Pakistani developer tracking infrastructure.
