@@ -5,7 +5,7 @@ import {
   buildRegex,
   buildDeveloperCorpus,
   matchTagsForDeveloper
-} from './tag-matcher.cjs';
+} from './tag-matcher.js';
 
 function enrichLeaderboardWithTags(leaderboard, keywordDict = KEYWORD_DICT) {
   if (!Array.isArray(leaderboard)) {
