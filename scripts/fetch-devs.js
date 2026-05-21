@@ -2,6 +2,7 @@
 
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { matchTagsForDeveloper } = require('../src/utils/tag-matcher.cjs');
 
 const GITHUB_API_BASE = 'https://api.github.com';
 const SEARCH_DELAY_MS = 2100;
@@ -605,7 +606,7 @@ async function fetchDeveloperActivity(username, token) {
 
   const activityMetrics = computeActivityMetrics(recentEvents);
 
-  return {
+  const developer = {
     username: profile.login || username,
     name: profile.name || '',
     avatar_url: profile.avatar_url || '',
@@ -627,6 +628,10 @@ async function fetchDeveloperActivity(username, token) {
     digest_repos: digestRepos,
     raw_events_60d: recentEvents
   };
+
+  developer.tags = matchTagsForDeveloper(developer);
+
+  return developer;
 }
 
 function applyActivityFilter(developers) {

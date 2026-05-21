@@ -76,8 +76,7 @@ function stripInternalFields(entry) {
     output[field] = normalized[field];
   }
 
-  // Module 6 computes tags client-side in browser; server output always includes placeholder.
-  output.tags = [];
+  output.tags = Array.isArray(normalized.tags) ? normalized.tags : [];
 
   return output;
 }

@@ -48,6 +48,8 @@ The scanner is distributed across 24 hourly batches, so the full ecosystem is re
 | **Score** | `score-config.json` & `scripts/score.js` | Calculates a weighted score based on stars, recent activity, followers, and repo count using unified configuration |
 | **Leaderboard** | `scripts/write-leaderboard.js` | Writes the final ranked `data.json` with public-safe fields |
 
+During **Fetch**, each developer is assigned category tags (AI/ML, Web, DevOps, etc.) by matching bio, repos, and languages against [`src/utils/tag-keywords.json`](src/utils/tag-keywords.json) via [`src/utils/tag-matcher.cjs`](src/utils/tag-matcher.cjs). Tags flow through scoring into `public/data.json`. The leaderboard UI uses those tags when present and only recomputes them for older rows missing tags. Re-run the pipeline to refresh tags after keyword changes.
+
 ### Activity Filter
 
 Not everyone with a GitHub account qualifies. Developers must pass these thresholds:
