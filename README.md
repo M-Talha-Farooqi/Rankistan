@@ -1,6 +1,6 @@
 # Rankistan
 
-An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. The site includes a searchable **Leaderboard**, a **Developer Map** that groups developers by normalized profile locations on an interactive map of Pakistan, **Register** for profile checks, and **About** documentation for pipeline logic, scoring, and scheduling.
+An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. The site includes a searchable **Leaderboard**, a **Developer Map** that groups developers by normalized profile locations on an interactive map of Pakistan, a **Badge Generator** for README rank badges, **Register** for profile checks, and **About** documentation for pipeline logic, scoring, and scheduling.
 
 > **Note:** The frontend is currently optimized for desktop. Mobile design is still under development but usable.
 
@@ -20,6 +20,7 @@ An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. 
 |---|---|
 | **Leaderboard** | Ranked list from `public/data.json` with search, filters, sort, CSV export, and pagination |
 | **Map** | Pakistan outline with per-place counts; place breakdown; hover a node to sync-highlight and auto-scroll that place in the list; click a place to list developers for that bucket |
+| **Badge** | Generate a dynamic Shields.io rank badge for your GitHub README (Markdown, HTML, or reST snippets) |
 | **Register** | Validate a GitHub profile against pipeline criteria |
 | **About** | How the index works: scoring, activity filters, hourly batches, and FAQs |
 
@@ -99,6 +100,28 @@ AI summaries are generated only when a user expands a developer card.
 
 This design keeps summaries accurate and interactive while avoiding expensive bulk generation across the entire leaderboard.
 
+### README Rank Badges
+
+Ranked developers can embed a live badge in their GitHub README via the **Badge** tab.
+
+1. Enter a GitHub username — the UI looks up rank from `public/data.json`.
+2. Pick a Shields.io style (Flat, For The Badge, Flat Square, or Plastic).
+3. Copy the generated snippet (Markdown, HTML, or reST).
+
+Badges are rendered by [Shields.io](https://shields.io) using the dynamic endpoint pattern. Shields fetches JSON from the Cloudflare Worker at `/api/badge/{username}`, which reads the current leaderboard and returns a Shields-compatible payload (for example `rank #247`). The badge updates automatically when the leaderboard changes.
+
+Example badge URL (used inside copied snippets):
+
+```
+https://img.shields.io/endpoint?url=https%3A%2F%2Frankistan-summary-api.academics-ali.workers.dev%2Fapi%2Fbadge%2F{username}&style=flat
+```
+
+The badge API runs on the same Worker as dev summaries — not on `rankistan.dev`, which is static GitHub Pages and cannot serve API routes. Deploy Worker changes with:
+
+```bash
+npm run cf:deploy
+```
+
 ### Location + Map Strategy
 
 The frontend location system is deterministic and does not use AI for location inference.
@@ -150,6 +173,9 @@ node scripts/run-all.js --incremental 0 --dry-run
 
 # Start the frontend dev server
 npm run dev
+
+# Deploy the Cloudflare Worker (badge + summary APIs)
+npm run cf:deploy
 ```
 
 Dry-run reuses the local `public/data.json` leaderboard as sample data and writes to `public/data.dry-run.json` only. It does not run fetch, scoring, or per-batch merge — use a real incremental run when testing those steps. Production writes use an atomic temp-file + rename flow so `public/data.json` is never left partially written.
@@ -208,30 +234,40 @@ scripts/
   write-leaderboard.js  # Final leaderboard output
   run-all.js            # Pipeline orchestrator (--incremental N [--dry-run])
 cloudflare/
-  worker.js             # Cloudflare Worker summary API endpoint
+  worker.js             # Cloudflare Worker (dev summaries + badge JSON API)
   wrangler.toml         # Worker deployment config
 public/
   data.json             # Final leaderboard (served to frontend)
   data.dry-run.json     # Local dry-run output only (gitignored)
 src/
-  App.jsx               # Main app shell (Leaderboard / Map / Register / About tabs)
+  App.jsx               # Main app shell (Leaderboard / Map / Badge / Register / About tabs)
   pages/
     Leaderboard.jsx     # Developer rankings
     DevMap.jsx          # Pakistan map + place breakdown + per-place table
+    BadgeGenerator.jsx  # README rank badge generator
     Register.jsx        # Profile validation
     About.jsx           # User-facing docs (pipeline, scoring, scheduling)
+  utils/
+    groq.js             # Worker API URL helpers (summary + badge endpoints)
 ```
 
-## Groq Key Security
+## Cloudflare Worker API
 
-Summary generation runs behind a Cloudflare Worker (`cloudflare/worker.js`) at `/api/dev-summary`, so the Groq key is not exposed in the frontend bundle.
+The Worker (`cloudflare/worker.js`) backs two public endpoints:
+
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/dev-summary` | POST | On-demand AI developer summaries (Groq) |
+| `/api/badge/{username}` | GET | Shields.io JSON for dynamic README badges |
+
+Summary generation runs behind the Worker so the Groq key is not exposed in the frontend bundle.
 
 ### Security Model
 
-- Frontend sends developer metadata and receives summary text.
+- Frontend sends developer metadata and receives summary text; badge snippets point Shields.io at `/api/badge/{username}`.
 - `GROQ_API_KEY` is stored only in Worker secrets.
-- Worker enforces CORS and basic per-IP rate limiting.
-- Frontend calls the public Worker endpoint via `VITE_SUMMARY_API_URL`.
+- Worker enforces CORS and basic per-IP rate limiting (summaries).
+- Frontend resolves Worker URLs via `VITE_SUMMARY_API_URL` (see `src/utils/groq.js`).
 
 ### Trade-off
 
@@ -250,6 +286,7 @@ Configuration model:
 
 - [x] Leaderboard — Developer rankings with daily incremental updates
 - [x] Developer Map — Place distribution and per-place developer list
+- [x] Badge Generator — Dynamic README rank badges via Shields.io
 - [x] Registration — Profile validation against pipeline criteria
 - [x] About — On-site documentation for scoring, filters, and scheduling
 - [ ] Weekly Digest — AI-powered weekly summary of ecosystem trends
