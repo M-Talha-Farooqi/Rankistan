@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { resolveBadgeApiUrl } from "../utils/groq.js";
 
 const STYLES = [
   { id: "flat", label: "Flat" },
@@ -18,7 +19,7 @@ function buildStaticBadgeUrl(message, style) {
 }
 
 function buildBadgeUrl(username, style) {
-  const endpoint = `https://rankistan.dev/api/badge/${encodeURIComponent(username)}`;
+  const endpoint = resolveBadgeApiUrl(username);
   return (
     `https://img.shields.io/endpoint` +
     `?url=${encodeURIComponent(endpoint)}` +
@@ -90,8 +91,6 @@ export default function BadgeGenerator() {
   const [fmt, setFmt] = useState("md");
   const [rank, setRank] = useState(null);
   const [lookupState, setLookupState] = useState("idle"); // idle | loading | found | notfound | error
-  const [badgeLoaded, setBadgeLoaded] = useState(false);
-  const [badgeError, setBadgeError] = useState(false);
   const inputRef = useRef(null);
   const debounceRef = useRef(null);
   const leaderboardRef = useRef(null);
@@ -133,11 +132,6 @@ export default function BadgeGenerator() {
 
     return () => clearTimeout(debounceRef.current);
   }, [displayUser]);
-
-  useEffect(() => {
-    setBadgeLoaded(false);
-    setBadgeError(false);
-  }, [rank, style]);
 
   const badgeUrl = displayUser
     ? buildBadgeUrl(displayUser, style)
@@ -300,30 +294,14 @@ export default function BadgeGenerator() {
                     Failed to load data.json
                   </span>
                 ) : (
-                  <>
-                    {!badgeError ? (
-                      <img
-                        key={badgeUrl}
-                        src={badgeUrl}
-                        alt="Rankistan rank badge preview"
-                        className={`transition-opacity duration-300 ${badgeLoaded ? "opacity-100" : "opacity-0"}`}
-                        onLoad={() => setBadgeLoaded(true)}
-                        onError={() => setBadgeError(true)}
-                        style={{
-                          height: style === "for-the-badge" ? "28px" : "20px",
-                        }}
-                      />
-                    ) : (
-                      <span className="font-mono text-xs text-outline">
-                        Badge preview unavailable
-                      </span>
-                    )}
-                    {!badgeLoaded && !badgeError && (
-                      <span className="font-mono text-[10px] text-outline uppercase tracking-widest animate-pulse absolute">
-                        Loading...
-                      </span>
-                    )}
-                  </>
+                  <img
+                    key={badgeUrl}
+                    src={badgeUrl}
+                    alt="Rankistan rank badge preview"
+                    style={{
+                      height: style === "for-the-badge" ? "28px" : "20px",
+                    }}
+                  />
                 )}
               </div>
 

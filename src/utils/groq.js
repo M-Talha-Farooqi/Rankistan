@@ -60,23 +60,29 @@ function buildDevPayload(dev) {
   };
 }
 
-function resolveSummaryApiUrl() {
+function resolveApiBase() {
   const configuredBase = normalizeText(import.meta.env.VITE_SUMMARY_API_URL, 260);
   const base = configuredBase || DEFAULT_SUMMARY_API_BASE;
-
   const normalized = base.replace(/\/+$/, '');
 
-  // Accept either origin-only values (https://worker.workers.dev)
-  // or full endpoint values (https://worker.workers.dev/api/dev-summary).
   if (normalized.endsWith(SUMMARY_API_ROUTE)) {
-    return normalized;
+    return normalized.slice(0, -SUMMARY_API_ROUTE.length);
   }
 
   if (normalized.endsWith('/api')) {
-    return `${normalized}/dev-summary`;
+    return normalized.slice(0, -'/api'.length);
   }
 
-  return `${normalized}${SUMMARY_API_ROUTE}`;
+  return normalized;
+}
+
+function resolveSummaryApiUrl() {
+  return `${resolveApiBase()}${SUMMARY_API_ROUTE}`;
+}
+
+function resolveBadgeApiUrl(username) {
+  const safeUsername = encodeURIComponent(String(username || '').trim());
+  return `${resolveApiBase()}/api/badge/${safeUsername}`;
 }
 
 function truncateSummary(text) {
@@ -195,7 +201,9 @@ export {
   summaryCache,
   sleep,
   buildDevPayload,
+  resolveApiBase,
   resolveSummaryApiUrl,
+  resolveBadgeApiUrl,
   truncateSummary,
   validateSummary,
   callSummaryApiOnce,
