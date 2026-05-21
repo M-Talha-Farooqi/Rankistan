@@ -412,11 +412,7 @@ function isLikelyPakistaniLocation(location) {
     return false;
   }
 
-  if (hasCountry(normalized)) {
-    return true;
-  }
-
-  return Boolean(findCityKey(normalized));
+  return hasCountry(normalized);
 }
 
 export {

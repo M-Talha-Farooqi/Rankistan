@@ -188,7 +188,7 @@ export default function Register({ onChangeTab }) {
       const profileFailed = !isValidLocation || !hasEnoughRepos || !hasEnoughFollowers || !isOldEnough;
       if (profileFailed) {
         const reasons = [];
-        if (!isValidLocation) reasons.push(`Location '${data.location || 'not set'}' must be a Pakistani city or include 'Pakistan'`);
+        if (!isValidLocation) reasons.push(`Location '${data.location || 'not set'}' must include 'Pakistan'`);
         if (!hasEnoughRepos) reasons.push(`Only ${data.public_repos} public repos (need >3)`);
         if (!hasEnoughFollowers) reasons.push(`Only ${data.followers} followers (need >1)`);
         if (!isOldEnough) reasons.push(`Account is ${ageDays}d old (need >=${CRITERIA.MIN_ACCOUNT_AGE_DAYS}d)`);
@@ -375,7 +375,7 @@ export default function Register({ onChangeTab }) {
                     {renderCheckIcon(checks.exists)} <span>Active GitHub account</span>
                   </li>
                   <li className="flex items-start gap-3 text-xs font-mono text-outline">
-                    {renderCheckIcon(checks.location)} <span>Pakistani location detected (city or country)</span>
+                    {renderCheckIcon(checks.location)} <span>Location includes Pakistan</span>
                   </li>
                   <li className="flex items-start gap-3 text-xs font-mono text-outline">
                     {renderCheckIcon(checks.repos)} <span>More than 3 public repositories</span>
