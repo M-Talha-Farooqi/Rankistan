@@ -54,7 +54,7 @@ function ContributionHeatmap({ username }) {
   );
 }
 
-export default function DevCard({ dev, onGenerateSummary, summary, loadingSummaryUser }) {
+export default function DevCard({ dev, onGenerateSummary, onGenerateBadge, summary, loadingSummaryUser }) {
   const [isExpanded, setIsExpanded] = useState(false);
   
   const tagsColors = [
@@ -201,9 +201,13 @@ export default function DevCard({ dev, onGenerateSummary, summary, loadingSummar
                     Contact Unavailable
                   </button>
                 )}
-                <a href={`https://github.com/${username}`} target="_blank" rel="noreferrer" className="text-center bg-tertiary text-on-tertiary py-2.5 font-mono text-[10px] font-bold uppercase hover:bg-tertiary-fixed transition-all active:translate-y-px">
-                  Follow Node
-                </a>
+                <button
+                  type="button"
+                  onClick={() => onGenerateBadge?.(username)}
+                  className="text-center bg-tertiary text-on-tertiary py-2.5 font-mono text-[10px] font-bold uppercase hover:bg-tertiary-fixed transition-all active:translate-y-px"
+                >
+                  Generate Badge
+                </button>
               </div>
             </div>
           </div>

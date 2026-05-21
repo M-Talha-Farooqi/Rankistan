@@ -40,7 +40,7 @@ function exportCSV(devs) {
   URL.revokeObjectURL(url);
 }
 
-export default function Leaderboard({ searchTerm = '', onSearchChange, onChangeTab }) {
+export default function Leaderboard({ searchTerm = '', onSearchChange, onChangeTab, onNavigateToBadge }) {
   const [leaderboard, setLeaderboard] = useState([]);
   const [selectedTag, setSelectedTag] = useState('All');
   const [loading, setLoading] = useState(true);
@@ -255,6 +255,7 @@ export default function Leaderboard({ searchTerm = '', onSearchChange, onChangeT
                     key={dev.username}
                     dev={dev}
                     onGenerateSummary={handleGenerateSummary}
+                    onGenerateBadge={onNavigateToBadge}
                     summary={summaryByUser[dev.username]}
                     loadingSummaryUser={loadingSummaryUser}
                   />

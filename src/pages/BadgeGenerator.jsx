@@ -85,7 +85,10 @@ function CodeBlock({ code, language = "" }) {
   );
 }
 
-export default function BadgeGenerator() {
+export default function BadgeGenerator({
+  initialUsername = "",
+  onInitialUsernameConsumed,
+}) {
   const [username, setUsername] = useState("");
   const [style, setStyle] = useState("flat");
   const [fmt, setFmt] = useState("md");
@@ -97,6 +100,12 @@ export default function BadgeGenerator() {
   const leaderboardRef = useRef(null);
 
   const displayUser = username.trim();
+
+  useEffect(() => {
+    if (!initialUsername) return;
+    setUsername(initialUsername.replace(/\s/g, ""));
+    onInitialUsernameConsumed?.();
+  }, [initialUsername, onInitialUsernameConsumed]);
 
   // Fetch data.json and find the user's rank whenever username changes.
   useEffect(() => {
