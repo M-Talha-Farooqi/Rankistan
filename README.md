@@ -142,9 +142,17 @@ npm install
 # Run a single batch incrementally (0-23)
 node scripts/run-all.js --incremental 0
 
+# Dry-run: skip GitHub, test atomic write to public/data.dry-run.json (no PAT / rate limits)
+node scripts/run-all.js --incremental 0 --dry-run
+# Same as: SKIP_GITHUB=true node scripts/run-all.js --incremental 0
+
 # Start the frontend dev server
 npm run dev
 ```
+
+Dry-run reuses the local `public/data.json` leaderboard as sample data and writes to `public/data.dry-run.json` only. It does not run fetch, scoring, or per-batch merge — use a real incremental run when testing those steps. Production writes use an atomic temp-file + rename flow so `public/data.json` is never left partially written.
+
+> Do not set `SKIP_GITHUB=true` in GitHub Actions; CI must run the full incremental pipeline.
 
 ## Scheduling
 
@@ -196,12 +204,13 @@ scripts/
   fetch-devs.js         # Developer discovery + activity fetching
   score.js              # Scoring algorithm
   write-leaderboard.js  # Final leaderboard output
-  run-all.js            # Pipeline orchestrator (--incremental N)
+  run-all.js            # Pipeline orchestrator (--incremental N [--dry-run])
 cloudflare/
   worker.js             # Cloudflare Worker summary API endpoint
   wrangler.toml         # Worker deployment config
 public/
   data.json             # Final leaderboard (served to frontend)
+  data.dry-run.json     # Local dry-run output only (gitignored)
 src/
   App.jsx               # Main app shell (Leaderboard / Map / Register / About tabs)
   pages/

@@ -17,39 +17,6 @@ function loadExistingLeaderboard(targetPath = DATA_JSON) {
   }
 }
 
-/**
- * Atomically writes JSON by staging it in a temp file first, validating it,
- * and then renaming it over the live target.
- *
- * This avoids exposing a partially written or corrupt JSON file to the frontend.
- */
-function atomicWriteJsonSync(targetPath, value) {
-  const tmpPath = `${targetPath}.tmp`;
-
-  try {
-    const json = JSON.stringify(value);
-
-    // Write to a staging file in the same directory so rename stays atomic
-    // on the same filesystem.
-    fs.writeFileSync(tmpPath, json, "utf8");
-
-    // Validate the staged file before promoting it to the live path.
-    JSON.parse(fs.readFileSync(tmpPath, "utf8"));
-
-    fs.renameSync(tmpPath, targetPath);
-  } catch (error) {
-    try {
-      if (fs.existsSync(tmpPath)) {
-        fs.unlinkSync(tmpPath);
-      }
-    } catch {
-      // Best-effort cleanup only; preserve the original failure.
-    }
-
-    throw error;
-  }
-}
-
 function buildDryRunOutput(batchIndex, maxDevelopers) {
   // Dry-run mode avoids GitHub entirely. It reuses the current local leaderboard
   // as test data so we can verify JSON generation and atomic writes safely.
@@ -92,7 +59,7 @@ async function runIncremental(batchIndex, { dryRun = false } = {}) {
     ACTIVITY_THRESHOLDS,
   } = require("./fetch-devs.js");
   const { scoreDevelopers } = require("./score.js");
-  const { stripInternalFields } = require("./write-leaderboard.js");
+  const { stripInternalFields, atomicWriteJsonSync } = require("./write-leaderboard.js");
 
   if (batchIndex < 0 || batchIndex >= SEARCH_BATCHES.length) {
     console.error(

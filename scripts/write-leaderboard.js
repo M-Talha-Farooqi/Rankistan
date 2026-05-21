@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('node:fs/promises');
+const fsSync = require('node:fs');
 const path = require('node:path');
 
 const STRIP_FIELDS = new Set([
@@ -91,15 +92,36 @@ function buildFinalData(entries, now = new Date()) {
   };
 }
 
-async function atomicWriteMinifiedJson(targetPath, value) {
+/**
+ * Atomically writes JSON via a same-directory temp file and rename.
+ * Parses the staged file before promoting so readers never see corrupt JSON.
+ */
+function atomicWriteJsonSync(targetPath, value) {
   const tmpPath = `${targetPath}.tmp`;
 
   try {
-    await fs.writeFile(tmpPath, JSON.stringify(value), 'utf8');
-    await fs.rename(tmpPath, targetPath);
+    const json = JSON.stringify(value);
+    fsSync.writeFileSync(tmpPath, json, 'utf8');
+    JSON.parse(fsSync.readFileSync(tmpPath, 'utf8'));
+    fsSync.renameSync(tmpPath, targetPath);
+  } catch (error) {
+    try {
+      if (fsSync.existsSync(tmpPath)) {
+        fsSync.unlinkSync(tmpPath);
+      }
+    } catch {
+      // Best-effort cleanup; preserve the original failure.
+    }
+
+    throw error;
+  }
+}
+
+async function atomicWriteMinifiedJson(targetPath, value) {
+  try {
+    atomicWriteJsonSync(targetPath, value);
   } catch (error) {
     console.error(`Module 4 write failed for ${targetPath}: ${error.message}`);
-    await fs.unlink(tmpPath).catch(() => {});
     throw error;
   }
 }
@@ -141,7 +163,8 @@ module.exports = {
   stripInternalFields,
   validateInput,
   hasValidRankAndScore,
-  atomicWriteMinifiedJson
+  atomicWriteMinifiedJson,
+  atomicWriteJsonSync
 };
 
 if (require.main === module) {
