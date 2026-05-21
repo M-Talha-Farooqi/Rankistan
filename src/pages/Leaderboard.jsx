@@ -156,7 +156,8 @@ export default function Leaderboard({ searchTerm = '', onSearchChange, onChangeT
     <main className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 grid-lines pointer-events-none"></div>
       <div className="max-w-7xl mx-auto p-4 md:p-8 relative z-10">
-      <div className="mb-12">
+      <div className="flex flex-col gap-6">
+      <div>
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-outline-variant pb-6">
           <div className="border-l-4 border-primary pl-6">
             <div className="text-tertiary font-mono text-xs mb-2 tracking-widest flex items-center gap-2">
@@ -290,6 +291,7 @@ export default function Leaderboard({ searchTerm = '', onSearchChange, onChangeT
           )}
         </>
       )}
+      </div>
       </div>
     </main>
   );

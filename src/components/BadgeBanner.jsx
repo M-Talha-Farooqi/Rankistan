@@ -8,9 +8,9 @@ import React from 'react';
  */
 export default function BadgeBanner({ onNavigateToBadge }) {
   return (
-    <div className="mb-6 border border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4">
-      <div className="flex items-start gap-4 min-w-0">
-        <span className="material-symbols-outlined text-secondary shrink-0 mt-0.5">shield</span>
+    <div className="border border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4">
+      <div className="flex items-center gap-4 min-w-0">
+        <span className="material-symbols-outlined text-secondary shrink-0 text-3xl leading-none">shield</span>
         <div className="min-w-0">
           <div className="font-mono text-[10px] text-secondary uppercase tracking-widest mb-1">New Feature</div>
           <p className="font-body text-sm text-on-surface-variant leading-snug">
