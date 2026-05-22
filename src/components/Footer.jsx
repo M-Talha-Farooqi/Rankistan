@@ -1,3 +1,7 @@
+import pkg from '../../package.json' with { type: 'json' };
+
+const APP_VERSION = pkg.version;
+
 export default function Footer() {
   return (
     <footer className="bg-surface-container-lowest border-t border-outline-variant w-full mt-12">
@@ -9,7 +13,7 @@ export default function Footer() {
         </div>
         <nav className="flex gap-6">
           <a className="hover:text-primary transition-colors" href="https://github.com/Sudo-Ali-Dev/pakdev-index/blob/main/README.md" target="_blank" rel="noopener noreferrer">Documentation</a>
-          <a className="hover:text-primary transition-colors" href="https://github.com/Sudo-Ali-Dev/pakdev-index" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a className="hover:text-primary transition-colors" href="https://github.com/Sudo-Ali-Dev/Rankistan" target="_blank" rel="noopener noreferrer">GitHub</a>
         </nav>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-tertiary">
@@ -17,7 +21,7 @@ export default function Footer() {
             <span>ALL_SYSTEMS_OPERATIONAL</span>
           </div>
           <span className="text-outline-variant/30 hidden lg:inline">|</span>
-          <span className="hidden lg:inline">V1.0.4-STABLE</span>
+          <span className="hidden lg:inline">V{APP_VERSION}-STABLE</span>
         </div>
       </div>
     </footer>
