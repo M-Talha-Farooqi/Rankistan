@@ -3,10 +3,11 @@ import Header from './components/Header';
 import MobileTabBar from './components/MobileTabBar';
 import Footer from './components/Footer';
 import Leaderboard from './pages/Leaderboard';
-import Register from './pages/Register';
 import DevMap from './pages/DevMap';
 import About from './pages/About';
+import Evolution from './pages/Evolution';
 import BadgeGenerator from './pages/BadgeGenerator';
+import Register from './pages/Register';
 
 function App() {
   const [activeTab, setActiveTab] = useState('leaderboard');
@@ -20,6 +21,7 @@ function App() {
       register: 'Rankistan | Register',
       map: 'Rankistan | Dev Map',
       about: 'Rankistan | About',
+      evolution: 'Rankistan | Evolution',
       badge: 'Rankistan | Badge Generator',
     };
     document.title = titles[activeTab] || 'Rankistan';
@@ -46,7 +48,8 @@ function App() {
         {activeTab === 'leaderboard' && <Leaderboard searchTerm={searchTerm} onSearchChange={setSearchTerm} onChangeTab={handleChangeTab} onNavigateToBadge={handleNavigateToBadge} />}
         {activeTab === 'register' && <Register onChangeTab={handleChangeTab} />}
         {activeTab === 'map' && <DevMap />}
-        {activeTab === 'about' && <About />}
+        {activeTab === 'about' && <About onChangeTab={handleChangeTab} />}
+        {activeTab === 'evolution' && <Evolution />}
         {activeTab === 'badge' && (
           <BadgeGenerator
             initialUsername={badgePrefillUsername}

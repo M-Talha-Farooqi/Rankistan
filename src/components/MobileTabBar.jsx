@@ -6,6 +6,7 @@ const TABS = [
   { id: 'register', label: 'Join', icon: 'app_registration' },
   { id: 'badge', label: 'Badge', icon: 'badge' },
   { id: 'about', label: 'About', icon: 'info' },
+  { id: 'evolution', label: 'Evol', icon: 'history' },
 ];
 
 export default function MobileTabBar({ activeTab, onChangeTab }) {
