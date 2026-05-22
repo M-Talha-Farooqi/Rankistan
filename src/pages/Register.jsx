@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { CACHE_KEYS, cache } from '../utils/cache';
 import { isLikelyPakistaniLocation, normalizeLocationForDisplay } from '../utils/location';
 import scoreConfig from '../../score-config.json';
+import ScoreBreakdownPanel from '../components/ScoreBreakdownPanel';
+import { computeDeveloperScoreBreakdown } from '../utils/score-breakdown.js';
 
 const MEANINGFUL_EVENTS = new Set(['PushEvent', 'PullRequestEvent', 'IssuesEvent', 'ReleaseEvent']);
 
@@ -60,6 +62,8 @@ export default function Register({ onChangeTab }) {
     noLongGaps: null,
   });
   const [profileData, setProfileData] = useState(null);
+  const [scoreBreakdown, setScoreBreakdown] = useState(null);
+  const [gatesPassed, setGatesPassed] = useState(false);
   const [recentDevs, setRecentDevs] = useState([]);
   const statusPanelRef = useRef(null);
   const [statusPanelOffset, setStatusPanelOffset] = useState(0);
@@ -150,6 +154,8 @@ export default function Register({ onChangeTab }) {
     setErrorMsg('');
     setChecks({ exists: null, location: null, repos: null, followers: null, accountAge: null, contributions: null, noLongGaps: null });
     setProfileData(null);
+    setScoreBreakdown(null);
+    setGatesPassed(false);
 
     try {
       const res = await fetch(`https://api.github.com/users/${username.trim()}`);
@@ -193,6 +199,8 @@ export default function Register({ onChangeTab }) {
         if (!hasEnoughFollowers) reasons.push(`Only ${data.followers} followers (need >1)`);
         if (!isOldEnough) reasons.push(`Account is ${ageDays}d old (need >=${CRITERIA.MIN_ACCOUNT_AGE_DAYS}d)`);
         setChecks((c) => ({ ...c, contributions: false, noLongGaps: false }));
+        setScoreBreakdown(null);
+        setGatesPassed(false);
         setStatus('error');
         setErrorMsg(`SYSTEM_ERR: ${reasons.join('. ')}.`);
         return;
@@ -226,40 +234,41 @@ export default function Register({ onChangeTab }) {
       const hasContributions = count >= CRITERIA.MIN_CONTRIBUTIONS_60D;
       const hasNoLongGaps = longestGap <= CRITERIA.MAX_INACTIVITY_GAP_DAYS;
 
-      // Calculate score
-      const now = Date.now();
-      const cutoff30d = 30 * 24 * 60 * 60 * 1000;
-      let activityScore = 0;
-      allEvents.forEach(e => {
-        const t = new Date(e.created_at).getTime();
-        if (t >= now - cutoff30d) {
-          if (e.type === 'PushEvent') activityScore += scoreConfig.WEIGHTS.push;
-          if (e.type === 'PullRequestEvent') activityScore += scoreConfig.WEIGHTS.pr;
-          if (e.type === 'IssuesEvent') activityScore += scoreConfig.WEIGHTS.issue;
-          if (e.type === 'ReleaseEvent') activityScore += scoreConfig.WEIGHTS.release;
-        }
+      const breakdown = computeDeveloperScoreBreakdown({
+        config: scoreConfig,
+        events: allEvents,
+        totalStars,
+        followers: data.followers,
+        publicRepos: data.public_repos,
+        createdAt: data.created_at
       });
-      const cappedStars = Math.min(totalStars, scoreConfig.MAX_STARS_FOR_SCORING);
-      const cappedFollowers = Math.min(data.followers || 0, scoreConfig.MAX_FOLLOWERS_FOR_SCORING);
-      const baseScore = (cappedStars * scoreConfig.STAR_WEIGHT) + activityScore + (cappedFollowers * scoreConfig.WEIGHTS.followers) + ((data.public_repos || 0) * scoreConfig.WEIGHTS.publicRepos);
-      const agePenalty = ageDays < scoreConfig.SIX_MONTHS_DAYS ? 0.5 : 1;
-      const calculatedScore = Math.round(baseScore * agePenalty);
 
+      const calculatedScore = breakdown.finalScore;
+      const activityPassed = hasContributions && hasNoLongGaps;
+
+      setScoreBreakdown(breakdown);
       setChecks((c) => ({
         ...c,
         contributions: hasContributions,
         noLongGaps: hasNoLongGaps,
       }));
 
-      if (!hasContributions || !hasNoLongGaps) {
+      if (!activityPassed) {
         const reasons = [];
         if (!hasContributions) reasons.push(`${count} meaningful contributions in 60d (need >=${CRITERIA.MIN_CONTRIBUTIONS_60D})`);
         if (!hasNoLongGaps) reasons.push(`Longest inactivity gap: ${longestGap}d (max ${CRITERIA.MAX_INACTIVITY_GAP_DAYS}d)`);
+        setGatesPassed(false);
         setStatus('error');
         setErrorMsg(`SYSTEM_ERR: Activity check failed. ${reasons.join('. ')}.`);
+        setProfileData({
+          ...data,
+          _calculatedScore: calculatedScore,
+          _agePenaltyApplied: breakdown.agePenalty.applied
+        });
         return;
       }
 
+      setGatesPassed(true);
       setStatus('complete');
 
       const newReg = {
@@ -273,7 +282,11 @@ export default function Register({ onChangeTab }) {
         isNew: true,
       };
 
-      setProfileData({ ...data, _calculatedScore: calculatedScore, _agePenaltyApplied: agePenalty < 1 });
+      setProfileData({
+        ...data,
+        _calculatedScore: calculatedScore,
+        _agePenaltyApplied: breakdown.agePenalty.applied
+      });
 
       try {
         const stored = JSON.parse(localStorage.getItem('pakdev_pending_nodes') || '[]');
@@ -461,6 +474,8 @@ export default function Register({ onChangeTab }) {
             </div>
           </div>
         </div>
+
+        <ScoreBreakdownPanel breakdown={scoreBreakdown} gatesPassed={gatesPassed} />
 
         <div className="mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
           <div className="p-4 sm:p-6 border border-outline-variant bg-surface-container-lowest">
