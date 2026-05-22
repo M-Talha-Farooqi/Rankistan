@@ -1,8 +1,11 @@
-'use strict';
-
-const fs = require('node:fs/promises');
-const path = require('node:path');
-const config = require('../score-config.json');
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import config from '../score-config.json' with { type: 'json' };
+import {
+  computeActivityScore30d,
+  computeActivityScore30dFromCounts
+} from '../src/utils/activity-score.js';
 
 const WEIGHTS = config.WEIGHTS;
 const STAR_WEIGHT = config.STAR_WEIGHT;
@@ -50,15 +53,14 @@ function calculateDeveloperScore(developer) {
   const cappedStars = Math.min(stars, MAX_STARS_FOR_SCORING);
   const cappedFollowers = Math.min(followers, MAX_FOLLOWERS_FOR_SCORING);
 
-  // Use split counts if available, fall back to flat events_30d for old cached data
   let activityScore;
   const ec = developer.event_counts_30d;
-  if (ec && typeof ec === 'object') {
-    activityScore =
-      (ec.releases || 0) * WEIGHTS.release +
-      (ec.prs      || 0) * WEIGHTS.pr      +
-      (ec.pushes   || 0) * WEIGHTS.push    +
-      (ec.issues   || 0) * WEIGHTS.issue;
+  const rawEvents = developer.raw_events_60d;
+
+  if (Array.isArray(rawEvents) && rawEvents.length > 0) {
+    activityScore = computeActivityScore30d(rawEvents, { config });
+  } else if (ec && typeof ec === 'object') {
+    activityScore = computeActivityScore30dFromCounts(ec, { config });
   } else {
     const events30d = sanitizeScoreField(developer, 'events_30d');
     activityScore = events30d * FALLBACK_ACTIVITY_WEIGHT;
@@ -85,7 +87,7 @@ function calculateDeveloperScore(developer) {
   return { score: finalScore, age_penalty_applied: isNewAccount };
 }
 
-function scoreDevelopers(rawDevelopers) {
+export function scoreDevelopers(rawDevelopers) {
 
   if (!Array.isArray(rawDevelopers)) {
     throw new Error('Expected an array of developers.');
@@ -116,6 +118,8 @@ function scoreDevelopers(rawDevelopers) {
   }));
 }
 
+export { calculateDeveloperScore, WEIGHTS, SIX_MONTHS_DAYS };
+
 async function runCli() {
   const inputArg = process.argv[2];
   const outputArg = process.argv[3];
@@ -142,14 +146,9 @@ async function runCli() {
   console.log(JSON.stringify(ranked.slice(0, 10), null, 2));
 }
 
-module.exports = {
-  scoreDevelopers,
-  calculateDeveloperScore,
-  WEIGHTS,
-  SIX_MONTHS_DAYS
-};
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 
-if (require.main === module) {
+if (isMain) {
   runCli().catch((error) => {
     console.error(error.message);
     process.exit(1);
