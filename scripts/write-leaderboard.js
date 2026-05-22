@@ -1,8 +1,7 @@
-'use strict';
-
-const fs = require('node:fs/promises');
-const fsSync = require('node:fs');
-const path = require('node:path');
+import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const STRIP_FIELDS = new Set([
   'total_contributions_60d',
@@ -35,14 +34,14 @@ const OUTPUT_FIELDS = [
   'batch_index'
 ];
 
-function hasValidRankAndScore(entry) {
+export function hasValidRankAndScore(entry) {
   const rank = Number(entry?.rank);
   const score = Number(entry?.score);
 
   return Number.isFinite(rank) && rank > 0 && Number.isFinite(score);
 }
 
-function validateInput(entries) {
+export function validateInput(entries) {
   if (!Array.isArray(entries)) {
     throw new Error('Module 4 aborted: input must be an array.');
   }
@@ -58,7 +57,7 @@ function validateInput(entries) {
   }
 }
 
-function stripInternalFields(entry) {
+export function stripInternalFields(entry) {
   const normalized = {
     ...entry,
     digest_repos: Array.isArray(entry?.digest_repos) ? entry.digest_repos : [],
@@ -81,7 +80,7 @@ function stripInternalFields(entry) {
   return output;
 }
 
-function buildFinalData(entries, now = new Date()) {
+export function buildFinalData(entries, now = new Date()) {
   const leaderboard = entries.map(stripInternalFields);
 
   return {
@@ -95,7 +94,7 @@ function buildFinalData(entries, now = new Date()) {
  * Atomically writes JSON via a same-directory temp file and rename.
  * Parses the staged file before promoting so readers never see corrupt JSON.
  */
-function atomicWriteJsonSync(targetPath, value) {
+export function atomicWriteJsonSync(targetPath, value) {
   const tmpPath = `${targetPath}.tmp`;
 
   try {
@@ -116,7 +115,7 @@ function atomicWriteJsonSync(targetPath, value) {
   }
 }
 
-async function atomicWriteMinifiedJson(targetPath, value) {
+export async function atomicWriteMinifiedJson(targetPath, value) {
   try {
     atomicWriteJsonSync(targetPath, value);
   } catch (error) {
@@ -125,7 +124,7 @@ async function atomicWriteMinifiedJson(targetPath, value) {
   }
 }
 
-async function writeLeaderboard(entries, options = {}) {
+export async function writeLeaderboard(entries, options = {}) {
   validateInput(entries);
 
   const repoRoot = options.repoRoot || process.cwd();
@@ -156,17 +155,9 @@ async function runCli() {
   await writeLeaderboard(entries, { outputPath });
 }
 
-module.exports = {
-  writeLeaderboard,
-  buildFinalData,
-  stripInternalFields,
-  validateInput,
-  hasValidRankAndScore,
-  atomicWriteMinifiedJson,
-  atomicWriteJsonSync
-};
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 
-if (require.main === module) {
+if (isMain) {
   runCli().catch((error) => {
     console.error(error.message);
     process.exit(1);

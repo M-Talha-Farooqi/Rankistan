@@ -1,8 +1,7 @@
-'use strict';
-
-const fs = require('node:fs/promises');
-const path = require('node:path');
-const { matchTagsForDeveloper } = require('../src/utils/tag-matcher.cjs');
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { matchTagsForDeveloper } from '../src/utils/tag-matcher.js';
 
 const GITHUB_API_BASE = 'https://api.github.com';
 const SEARCH_DELAY_MS = 2100;
@@ -739,7 +738,7 @@ async function fetchPakistaniDevelopers(options = {}) {
   return finalDevelopers;
 }
 
-module.exports = {
+export {
   fetchPakistaniDevelopers,
   applyActivityFilter,
   computeActivityMetrics,
@@ -748,7 +747,9 @@ module.exports = {
   ACTIVITY_THRESHOLDS
 };
 
-if (require.main === module) {
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMain) {
   console.log('Starting PakDev developer fetch...');
   fetchPakistaniDevelopers()
     .then((developers) => {

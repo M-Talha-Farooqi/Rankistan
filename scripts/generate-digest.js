@@ -1,7 +1,6 @@
-'use strict';
-
-const fs = require('node:fs/promises');
-const path = require('node:path');
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
@@ -279,7 +278,7 @@ async function generateWeeklyDigest(options = {}) {
   return output;
 }
 
-module.exports = {
+export {
   generateWeeklyDigest,
   flattenDigestRepos,
   dedupeReposByOwnerName,
@@ -288,7 +287,9 @@ module.exports = {
   validateDigestText
 };
 
-if (require.main === module) {
+const isMain = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMain) {
   generateWeeklyDigest()
     .then((result) => {
       console.log(`Digest generated for ${result.week_of}. Repos used: ${result.repos.length}`);

@@ -1,4 +1,4 @@
-import KEYWORD_DICT from './tag-keywords.json';
+import KEYWORD_DICT from './tag-keywords.json' with { type: 'json' };
 
 function escapeRegex(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
