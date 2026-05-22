@@ -1,6 +1,6 @@
 # Rankistan
 
-An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. The site includes a searchable **Leaderboard**, a **Developer Map** that groups developers by normalized profile locations on an interactive map of Pakistan, a **Badge Generator** for README rank badges, **Register** for profile checks, and **About** documentation for pipeline logic, scoring, and scheduling.
+An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. The site includes a searchable **Leaderboard**, a **Developer Map** that groups developers by normalized profile locations on an interactive map of Pakistan, a **Badge Generator** for README rank badges, **Register** for profile checks with a live score breakdown, **Evolution** for how the scoring formula changed over time, and **About** documentation for pipeline logic, filters, and scheduling.
 
 > **Note:** The frontend is currently optimized for desktop. Mobile design is still under development but usable.
 
@@ -21,8 +21,9 @@ An AI-powered daily leaderboard tracking active Pakistani developers on GitHub. 
 | **Leaderboard** | Ranked list from `public/data.json` with search, filters, sort, CSV export, and pagination |
 | **Map** | Pakistan outline with per-place counts; place breakdown; hover a node to sync-highlight and auto-scroll that place in the list; click a place to list developers for that bucket |
 | **Badge** | Generate a dynamic Shields.io rank badge for your GitHub README (Markdown, HTML, or reST snippets) |
-| **Register** | Validate a GitHub profile against pipeline criteria |
-| **About** | How the index works: scoring, activity filters, hourly batches, and FAQs |
+| **Register** | Validate a GitHub profile against pipeline criteria; shows an estimated score breakdown (stars, activity by type, followers, repos) before batch sync |
+| **Evolution** | Plain-language history of scoring changes (oldest to newest), current formula, and why rules were tightened |
+| **About** | How the index works: scoring summary, activity filters, hourly batches, and FAQs |
 
 The map assigns each developer to a canonical place key using a deterministic normalization strategy in `src/utils/location.js`. It does token-aware country detection, alias-based city matching (including common spellings and local variants), and safe fallback handling for unresolved locations.
 
@@ -46,7 +47,7 @@ The scanner is distributed across 24 hourly batches, so the full ecosystem is re
 |---|---|---|
 | **Discover** | `scripts/fetch-devs.js` | Searches GitHub for developers in Pakistan, split into multiple date ranges to stay within API search result limits (< 1000) |
 | **Fetch** | `scripts/fetch-devs.js` | Fetches profile, events (up to 2 pages / 200 events, last 60 days), repos, and linked social accounts (for LinkedIn) for each developer |
-| **Score** | `score-config.json` & `scripts/score.js` | Calculates a weighted score based on stars, recent activity, followers, and repo count using unified configuration |
+| **Score** | [`score-config.json`](score-config.json), [`scripts/score.js`](scripts/score.js), [`src/utils/activity-score.js`](src/utils/activity-score.js) | Weighted score from stars, 30-day activity (diminishing returns per UTC day), followers, and public repo count; same math as Register |
 | **Leaderboard** | `scripts/write-leaderboard.js` | Writes the final ranked `data.json` with public-safe fields |
 
 During **Fetch**, each developer is assigned category tags (AI/ML, Web, DevOps, etc.) by matching bio, repos, and languages against [`src/utils/tag-keywords.json`](src/utils/tag-keywords.json) via [`src/utils/tag-matcher.js`](src/utils/tag-matcher.js). Tags flow through scoring into `public/data.json`. The leaderboard UI uses those tags when present and only recomputes them for older rows missing tags. Re-run the pipeline to refresh tags after keyword changes.
@@ -136,18 +137,31 @@ The frontend location system is deterministic and does not use AI for location i
 
 ### Scoring Formula
 
+All weights and caps live in [`score-config.json`](score-config.json). The pipeline and Register share [`src/utils/activity-score.js`](src/utils/activity-score.js); Register also uses [`src/utils/score-breakdown.js`](src/utils/score-breakdown.js) for the per-component UI.
+
 ```
-base_score = (stars × 2) + (activity_score) + (followers × 1) + (public_repos × 0.5)
+base_score = (min(stars, 250) × 2) + activity_score + (min(followers, 500) × 1) + (public_repos × 0.5)
+final_score = round(base_score × (account_age < 6 months ? 0.5 : 1.0))
 ```
 
-> **Note on Caps**: 
-> - Stars are capped at **250** per developer (contributing a maximum of **500 points**). 
-> - Followers are capped at **500** per developer (contributing a maximum of **500 points**). 
-> 
-> Since Rankistan aims to measure active open-source contributions and development work, the previously uncapped followers (and high star cap) were causing these metrics to overpower the score, making the leaderboard less balanced and unfairly overshadowing developers who actively commit, push, and review code.
+> **Note on caps**
+> - Stars are capped at **250** (max **500** star points).
+> - Followers are capped at **500** (max **500** follower points).
+> - Accounts younger than **6 months** receive a **0.5×** multiplier on the full base score.
 
-**Activity Score Breakdown**
-Recent events in the last 30 days use diminishing returns per UTC calendar day, per type:
+**What counts (open source only)**
+
+| Component | Source |
+|-----------|--------|
+| Stars | Sum of stars on **public** repositories (private repos excluded) |
+| Activity | **Public** Push, Pull Request, Issue, and Release events in the last **30 days** |
+| Followers / public repos | GitHub profile fields |
+
+**What does not count:** watching, starring, forking, or commenting on repos (for score or contribution gates).
+
+**Activity score (current)**
+
+Recent meaningful events use diminishing returns **per UTC calendar day**, per type:
 
 - Marginal points for the *n*th event of a type on a day: `base / log2(n + 1)`
 - Daily total per type is capped, then summed across all days in the 30-day window
@@ -159,14 +173,11 @@ Recent events in the last 30 days use diminishing returns per UTC calendar day, 
 | Pull Request | 4.0 | 25 pts | — |
 | Release | 5.0 | 20 pts | — |
 
-(Fallback: synthetic single-day curve from `event_counts_30d`, or 3.125 points per event when only flat `events_30d` exists)
+During scoring, the pipeline prefers `raw_events_60d` from fetch (then filters to 30 days). If only per-type totals exist, it uses `event_counts_30d` with a synthetic single-day curve. If only flat `events_30d` exists, it falls back to **3.125** points per event.
 
-`events_30d` on the leaderboard remains a raw event count; score uses the capped curve above.
+`events_30d` on the leaderboard is a **raw** event count and can be higher than the capped activity points used in score.
 
-For a plain-language history of how the score formula changed (and why), open the **Evolution** tab in the app.
-
-- Stars are capped at 250 and followers are capped at 500 to prevent outlier dominance
-- Accounts younger than 6 months receive a 0.5× penalty
+For a plain-language history of how the formula changed (and why), open the **Evolution** tab in the app or read [`src/pages/Evolution.jsx`](src/pages/Evolution.jsx).
 
 ## Running Locally
 
@@ -181,12 +192,17 @@ node scripts/run-all.js --incremental 0
 node scripts/run-all.js --incremental 0 --dry-run
 # Same as: SKIP_GITHUB=true node scripts/run-all.js --incremental 0
 
+# Verify activity scoring helpers (log2 curve + daily caps)
+npm run verify:activity
+
 # Start the frontend dev server
 npm run dev
 
 # Deploy the Cloudflare Worker (badge + summary APIs)
 npm run cf:deploy
 ```
+
+The repo root is ESM (`"type": "module"` in `package.json`); pipeline scripts use `import`/`export` and import JSON with `with { type: 'json' }`.
 
 Dry-run reuses the local `public/data.json` leaderboard as sample data and writes to `public/data.dry-run.json` only. It does not run fetch, scoring, or per-batch merge — use a real incremental run when testing those steps. Production writes use an atomic temp-file + rename flow so `public/data.json` is never left partially written.
 
@@ -238,10 +254,12 @@ You can trigger any batch manually via **Actions → "Update Leaderboard" → Ru
 ## Project Structure
 
 ```
+score-config.json       # Weights, caps, ACTIVITY_SCORING (single source of truth)
 scripts/
   fetch-devs.js         # Developer discovery + activity fetching
-  score.js              # Scoring algorithm
-  write-leaderboard.js  # Final leaderboard output
+  score.js              # Batch scoring (uses activity-score.js)
+  verify-activity-score.js  # Sanity checks for activity curve
+  write-leaderboard.js  # Final leaderboard output (strips internal fields)
   run-all.js            # Pipeline orchestrator (--incremental N [--dry-run])
 cloudflare/
   worker.js             # Cloudflare Worker (dev summaries + badge JSON API)
@@ -250,15 +268,20 @@ public/
   data.json             # Final leaderboard (served to frontend)
   data.dry-run.json     # Local dry-run output only (gitignored)
 src/
-  App.jsx               # Main app shell (Leaderboard / Map / Badge / Register / About tabs)
+  App.jsx               # Main app shell (Leaderboard / Map / Badge / Register / About / Evolution)
   pages/
     Leaderboard.jsx     # Developer rankings
     DevMap.jsx          # Pakistan map + place breakdown + per-place table
     BadgeGenerator.jsx  # README rank badge generator
-    Register.jsx        # Profile validation
-    About.jsx           # User-facing docs (pipeline, scoring, scheduling)
+    Register.jsx        # Profile validation + live score breakdown
+    Evolution.jsx       # Scoring formula changelog (user-facing)
+    About.jsx           # Pipeline, scoring summary, filters, FAQs
+  components/
+    ScoreBreakdownPanel.jsx  # Register score bifurcation UI
   utils/
-    groq.js             # Worker API URL helpers (summary + badge endpoints)
+    activity-score.js   # Shared 30d activity curve (pipeline + Register)
+    score-breakdown.js    # Full score breakdown for Register UI
+    groq.js               # Worker API URL helpers (summary + badge endpoints)
 ```
 
 ## Cloudflare Worker API
@@ -299,6 +322,8 @@ Configuration model:
 - [x] Badge Generator — Dynamic README rank badges via Shields.io
 - [x] Registration — Profile validation against pipeline criteria
 - [x] About — On-site documentation for scoring, filters, and scheduling
+- [x] Evolution — Scoring formula history and plain-language rationale
+- [x] Register score breakdown — Live estimate with per-component points before batch sync
 - [ ] Weekly Digest — AI-powered weekly summary of ecosystem trends
 - [ ] Archives — Browse previous weekly digest reports
 - [ ] Report Detail — Detailed view of an archived weekly report
