@@ -142,13 +142,14 @@ The frontend location system is deterministic and does not use AI for location i
 All weights and caps live in [`score-config.json`](score-config.json). The pipeline and Register share [`src/utils/activity-score.js`](src/utils/activity-score.js); Register also uses [`src/utils/score-breakdown.js`](src/utils/score-breakdown.js) for the per-component UI.
 
 ```
-base_score = (min(stars, 250) × 2) + activity_score + (min(followers, 500) × 1) + (public_repos × 0.5)
+base_score = (min(stars, 250) × 2) + activity_score + (min(followers, 500) × 1) + (min(public_repos, 200) × 0.5)
 final_score = round(base_score × (account_age < 6 months ? 0.5 : 1.0))
 ```
 
 > **Note on caps**
 > - Stars are capped at **250** (max **500** star points).
 > - Followers are capped at **500** (max **500** follower points).
+- Public repos are capped at **200** (max **100** repo points).
 > - Accounts younger than **6 months** receive a **0.5×** multiplier on the full base score.
 
 **What counts (open source only)**

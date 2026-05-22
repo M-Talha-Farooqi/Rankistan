@@ -134,7 +134,10 @@ export default function ScoreBreakdownPanel({ breakdown, gatesPassed = true }) {
             <tr className="border-b border-outline-variant/50">
               <td className="p-3 sm:p-4 text-on-surface">Public repos</td>
               <td className="p-3 sm:p-4 text-outline">
-                {formatNum(publicRepos.count)} repos × {publicRepos.weight}
+                {formatNum(publicRepos.raw)} repos × {publicRepos.weight}
+                {publicRepos.capApplied && (
+                  <span className="text-tertiary"> → capped at {formatNum(publicRepos.capped)}</span>
+                )}
               </td>
               <td className="p-3 sm:p-4 text-right text-primary font-bold tabular-nums">
                 +{formatPoints(publicRepos.points)}

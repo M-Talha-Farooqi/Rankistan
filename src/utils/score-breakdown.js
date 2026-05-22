@@ -33,6 +33,7 @@ export function computeDeveloperScoreBreakdown({
   const starWeight = config.STAR_WEIGHT ?? 2;
   const maxStars = config.MAX_STARS_FOR_SCORING ?? 250;
   const maxFollowers = config.MAX_FOLLOWERS_FOR_SCORING ?? 500;
+  const maxPublicRepos = config.MAX_PUBLIC_REPOS_FOR_SCORING ?? 200;
   const sixMonthsDays = config.SIX_MONTHS_DAYS ?? 180;
   const followerWeight = config.WEIGHTS?.followers ?? 1;
   const publicRepoWeight = config.WEIGHTS?.publicRepos ?? 0.5;
@@ -45,8 +46,9 @@ export function computeDeveloperScoreBreakdown({
   const cappedFollowers = Math.min(rawFollowers, maxFollowers);
   const followersPoints = cappedFollowers * followerWeight;
 
-  const repoCount = Math.max(0, Math.floor(Number(publicRepos) || 0));
-  const publicReposPoints = repoCount * publicRepoWeight;
+  const rawRepos = Math.max(0, Math.floor(Number(publicRepos) || 0));
+  const cappedRepos = Math.min(rawRepos, maxPublicRepos);
+  const publicReposPoints = cappedRepos * publicRepoWeight;
 
   const activity = computeActivityBreakdown30d(events, { config });
 
@@ -76,9 +78,11 @@ export function computeDeveloperScoreBreakdown({
       capApplied: rawFollowers > cappedFollowers
     },
     publicRepos: {
-      count: repoCount,
+      raw: rawRepos,
+      capped: cappedRepos,
       weight: publicRepoWeight,
-      points: publicReposPoints
+      points: publicReposPoints,
+      capApplied: rawRepos > cappedRepos
     },
     activity: {
       total: activity.total,

@@ -25,7 +25,7 @@ const INTRO_BULLETS = [
 ];
 
 const FORMULA_PLAIN_ENGLISH = [
-  'Stars and followers are capped (250 stars, 500 followers) before weights are applied.',
+  'Stars, followers, and public repos are capped (250 stars, 500 followers, 200 repos) before weights are applied.',
   'Activity points use diminishing returns per UTC calendar day—spamming the same event type in one day earns very little.',
   'Accounts younger than 6 months receive half the base score (0.5× multiplier).',
 ];
@@ -172,7 +172,7 @@ export default function Evolution() {
           </div>
           <div className="overflow-x-auto bg-surface-container-low border border-outline-variant p-3 sm:p-5 mb-4 font-mono text-xs sm:text-sm leading-relaxed">
             <div className="text-primary">
-              base_score = (min(stars, 250) × 2) + activity_score + (min(followers, 500) × 1) + (public_repos × 0.5)
+              base_score = (min(stars, 250) × 2) + activity_score + (min(followers, 500) × 1) + (min(public_repos, 200) × 0.5)
             </div>
             <div className="text-tertiary mt-2">
               final_score = round(base_score × (account_age &lt; 6mo ? 0.5 : 1.0))

@@ -4,7 +4,7 @@ const SCORING_WEIGHTS = [
   { field: 'Stars', weight: '× 2', note: 'Capped at 250 to prevent outlier dominance' },
   { field: 'Activity (30d)', weight: 'log2 curve', note: 'Per UTC day: base / log2(n+1), then daily cap. Push 15/day (20 counted), Issue 15, PR 25, Release 20' },
   { field: 'Followers', weight: '× 1', note: 'Capped at 500 to prevent outlier dominance' },
-  { field: 'Public Repos', weight: '× 0.5', note: 'Breadth of open-source work' },
+  { field: 'Public Repos', weight: '× 0.5', note: 'Capped at 200 repos (max 100 points)' },
 ];
 
 const ACTIVITY_FILTERS = [
@@ -246,7 +246,7 @@ export default function About({ onChangeTab }) {
 
             <div className="overflow-x-auto bg-surface-container-low border border-outline-variant p-3 sm:p-5 mb-4 sm:mb-6 font-mono text-xs sm:text-sm leading-relaxed">
               <div className="text-primary">
-                base_score = (stars × 2) + (activity_score) + (followers × 1) + (public_repos × 0.5)
+                base_score = (stars × 2) + (activity_score) + (followers × 1) + (min(public_repos, 200) × 0.5)
               </div>
               <div className="text-tertiary mt-2">
                 final_score = base_score × (account_age &lt; 6mo ? 0.5 : 1.0)
@@ -267,7 +267,7 @@ export default function About({ onChangeTab }) {
               <span className="font-mono text-[10px] text-tertiary uppercase tracking-widest">Penalty Notice</span>
               <p className="font-body text-xs text-outline leading-relaxed mt-1">
                 Accounts younger than <span className="text-on-surface font-bold">6 months</span> receive a <span className="text-on-surface font-bold">0.5×</span> multiplier.
-                Stars are capped at <span className="text-on-surface font-bold">250</span> and followers at <span className="text-on-surface font-bold">500</span> before weights are applied.
+                Stars are capped at <span className="text-on-surface font-bold">250</span>, followers at <span className="text-on-surface font-bold">500</span>, and public repos at <span className="text-on-surface font-bold">200</span> before weights are applied.
               </p>
             </div>
 
