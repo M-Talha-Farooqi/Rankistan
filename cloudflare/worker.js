@@ -216,29 +216,22 @@ function isRateLimited(ip) {
   return false;
 }
 
-function parseKeyList(rawValue) {
-  if (typeof rawValue !== 'string') {
-    return [];
-  }
+const GROQ_KEY_SLOTS = 8;
 
-  return rawValue
-    .split(/[\n,]/)
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
+function readGroqKey(env, slot) {
+  const value = env[`GROQ_API_KEY_${slot}`];
+  return typeof value === 'string' ? value.trim() : '';
 }
 
 function getGroqApiKeys(env) {
-  const fromList = parseKeyList(env.GROQ_API_KEYS);
-  const singles = [env.GROQ_API_KEY, env.GROQ_API_KEY_PAKDEVINDEX]
-    .map((value) => (typeof value === 'string' ? value.trim() : ''))
-    .filter((value) => value.length > 0);
-
-  const fromIndexedSecrets = Object.entries(env)
-    .filter(([key]) => /^gsk_key_\d+$/i.test(key) || /^groq_api_key_\d+$/i.test(key))
-    .map(([, value]) => (typeof value === 'string' ? value.trim() : ''))
-    .filter((value) => value.length > 0);
-
-  return [...new Set([...fromList, ...singles, ...fromIndexedSecrets])];
+  const keys = [];
+  for (let slot = 1; slot <= GROQ_KEY_SLOTS; slot += 1) {
+    const value = readGroqKey(env, slot);
+    if (value) {
+      keys.push(value);
+    }
+  }
+  return keys;
 }
 
 function shouldTryNextKey(error) {
@@ -478,7 +471,7 @@ export default {
 
     const apiKeys = getGroqApiKeys(env);
     if (apiKeys.length === 0) {
-      return jsonResponse({ error: 'Server is missing Groq keys (GROQ_API_KEYS or GROQ_API_KEY).' }, 500, corsOrigin);
+      return jsonResponse({ error: 'Server is missing Groq keys (set GROQ_API_KEY_1 … GROQ_API_KEY_8).' }, 500, corsOrigin);
     }
 
     try {

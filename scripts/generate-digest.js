@@ -2,6 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const GROQ_KEY_SLOTS = 8;
+
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GROQ_MODEL = 'llama-3.3-70b-versatile';
 const GROQ_MAX_TOKENS = 600;
@@ -224,21 +226,30 @@ async function readDataJson(repoRoot) {
   return JSON.parse(raw);
 }
 
+function resolveGroqApiKeyFromEnv(env) {
+  for (let slot = 1; slot <= GROQ_KEY_SLOTS; slot += 1) {
+    const key = env[`GROQ_API_KEY_${slot}`];
+    if (typeof key === 'string' && key.trim()) {
+      return { key: key.trim(), source: `GROQ_API_KEY_${slot}` };
+    }
+  }
+
+  return null;
+}
+
 async function generateWeeklyDigest(options = {}) {
   const repoRoot = options.repoRoot || process.cwd();
   await loadDotEnv(repoRoot);
 
-  const apiKeyFromEnv = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_PakDevIndex;
-  const apiKey = options.groqApiKey || apiKeyFromEnv;
+  const apiKeyFromEnv = resolveGroqApiKeyFromEnv(process.env);
+  const apiKey = options.groqApiKey || apiKeyFromEnv?.key;
   const digestPath = path.join(repoRoot, 'public', 'digest.json');
 
   let apiKeySource = 'none';
   if (options.groqApiKey) {
     apiKeySource = 'options.groqApiKey';
-  } else if (process.env.GROQ_API_KEY) {
-    apiKeySource = 'GROQ_API_KEY';
-  } else if (process.env.GROQ_API_KEY_PakDevIndex) {
-    apiKeySource = 'GROQ_API_KEY_PakDevIndex';
+  } else if (apiKeyFromEnv) {
+    apiKeySource = apiKeyFromEnv.source;
   }
   console.log(`Module 3 key source: ${apiKeySource}`);
 
@@ -268,7 +279,7 @@ async function generateWeeklyDigest(options = {}) {
   }
 
   if (!apiKey) {
-    throw new Error('Missing GROQ_API_KEY or GROQ_API_KEY_PakDevIndex. Aborting without overwriting digest.json.');
+    throw new Error('Missing GROQ_API_KEY_1 … GROQ_API_KEY_8. Aborting without overwriting digest.json.');
   }
 
   const digestText = await callGroqWithOneRetry(finalRepos, apiKey);

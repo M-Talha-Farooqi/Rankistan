@@ -301,7 +301,7 @@ Summary generation runs behind the Worker so the Groq key is not exposed in the 
 ### Security Model
 
 - Frontend sends developer metadata and receives summary text; badge snippets point Shields.io at `/api/badge/{username}`.
-- `GROQ_API_KEY` is stored only in Worker secrets.
+- `GROQ_API_KEY_1` … `GROQ_API_KEY_8` are stored only in Worker secrets.
 - Worker enforces CORS and basic per-IP rate limiting (summaries).
 - Frontend resolves Worker URLs via `VITE_SUMMARY_API_URL` (see `src/utils/groq.js`).
 
@@ -311,12 +311,10 @@ This setup meaningfully reduces key exposure risk for a static frontend, but it 
 
 Configuration model:
 
-- **Recommended:** use `GROQ_API_KEYS` with comma/newline-separated keys for automatic fallback.
-- **If you only have one key:** use `GROQ_API_KEY`.
-- **Optional alternative (instead of list):** indexed secrets like `GROQ_API_KEY_1`, `GROQ_API_KEY_2` (and legacy names like `gsk_key_1`) are also supported.
+- Set **`GROQ_API_KEY_1` through `GROQ_API_KEY_8`** (same key format for each slot). The Worker rotates through them on rate limits.
 - `VITE_SUMMARY_API_URL`: public frontend pointer to Worker origin.
 - `SUMMARY_ALLOWED_ORIGIN`: allowed frontend origin for Worker CORS.
-- `GROQ_API_KEY_PAKDEVINDEX`: still used by CI digest generation (`scripts/generate-digest.js`).
+- CI digest generation (`scripts/generate-digest.js`) uses the first available slot from `GROQ_API_KEY_1` … `GROQ_API_KEY_8`.
 
 ## TODO
 
